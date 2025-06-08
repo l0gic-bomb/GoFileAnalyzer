@@ -12,6 +12,7 @@ type FileAnalyzer struct {
 	lineCount      int
 	wordCount      int
 	bytes          int
+	uniqueWords    int
 	frequencyWords map[string]int
 }
 
@@ -27,7 +28,25 @@ func cleanWord(word *string) string {
 	}, *word)
 }
 
+func (analyzer *FileAnalyzer) countUniqueWords() {
+	if analyzer.frequencyWords == nil {
+		return
+	}
+	analyzer.uniqueWords = 0
+
+	for _, value := range analyzer.frequencyWords {
+		if value == 1 {
+			analyzer.uniqueWords++
+		}
+	}
+}
+
 func (analyzer *FileAnalyzer) printTopTenWords() {
+	if analyzer.frequencyWords == nil {
+		fmt.Print("in printTopTenWords - frequencyWords is empty")
+		return
+	}
+
 	type wordCount struct {
 		word  string
 		count int
@@ -61,8 +80,7 @@ func (analyzer *FileAnalyzer) countFrequencyWords(allWords []string) {
 }
 
 func (analyzer *FileAnalyzer) countBytes(text string) {
-	var bytes int
-	bytes = len(text)
+	var bytes int = len(text)
 	analyzer.bytes = bytes
 }
 
@@ -72,7 +90,8 @@ func (analyzer *FileAnalyzer) analyzeText(text string) {
 	analyzer.wordCount = len(allWords)
 	analyzer.countFrequencyWords(allWords)
 	analyzer.countBytes(text)
-	fmt.Printf("Text has %d lines and %d words and %d bytes\n", analyzer.lineCount, analyzer.wordCount, analyzer.bytes)
+	analyzer.countUniqueWords()
+	fmt.Printf("Text has %d lines and %d words and %d bytes and %d unique words\n", analyzer.lineCount, analyzer.wordCount, analyzer.bytes, analyzer.uniqueWords)
 }
 
 func main() {
